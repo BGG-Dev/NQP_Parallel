@@ -1,112 +1,108 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace NQP
 {
     class NQP_Solver
     {
-        private int N;
+        private readonly int n;
 
-        public List<int[]> FinalSolutionSet;
+        private readonly List<int[]> finalSolutionSet;
 
-        private int[,] FiguresPos;
+        public IReadOnlyList<int[]> FinalSolutionSet => finalSolutionSet;
 
-        public void RunNQPtask(int n)
+        public NQP_Solver(int n)
         {
-            //Initialize start variables
-            N = n;
-            FinalSolutionSet = new List<int[]>();
-            bool[,] startChessField = new bool[N, N];
-            FiguresPos = new int[N, N];
+            this.n = n;
+            finalSolutionSet = new List<int[]>();
+        }
+
+        public void RunNQPtask()
+        {
+            bool[,] startChessField = new bool[n, n];
 
             //Initialize of solution set
-            List<int[]>[] SolutionSet = new List<int[]>[N];
-            for (int i = 0; i < N; i++)
-            {
-                SolutionSet[i] = new List<int[]>();
-            }
+            List<int[]>[] solutionSet = new List<int[]>[n];
 
             //Calling main func
-            Parallel.For(0, N, (i, state) =>
+            Parallel.For(0, n, (i, state) =>
             {
-                FiguresPos[i, 0] = i;
-                bool[,] nextChessField = startChessField.Clone() as bool[,];
-                MarkFields(0, i, ref nextChessField);
-                RunIteration(1, nextChessField, i, SolutionSet[i]);
+                solutionSet[i] = new List<int[]>();
+                int[] figuresPosForCurrentStream = new int[n];
+                figuresPosForCurrentStream[0] = i;
+                var nextChessField = MarkFields(0, i, startChessField);
+                RunIteration(1, nextChessField, solutionSet[i], figuresPosForCurrentStream);
             });
 
             //Concatinating result
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < n; i++)
             {
-                FinalSolutionSet.AddRange(SolutionSet[i]);
+                finalSolutionSet.AddRange(solutionSet[i]);
             }
         }
 
-        private void RunIteration(int indexOfCurrentFigure, bool[,] currentChessField, int indexOfStream, List<int[]> Solutions)
+        private void RunIteration(int indexOfCurrentFigure, bool[,] currentChessField, List<int[]> solutions, int[] figuresPos)
         {
-            if (indexOfCurrentFigure == N)
+            if (indexOfCurrentFigure == n)
             {
-                int[] temp = new int[N];
-                for (int i = 0; i < N; i++)
+                //Adding solution to list
+                int[] temp = new int[n];
+                for (int i = 0; i < n; i++)
                 {
-                    temp[i] = FiguresPos[indexOfStream, i];
+                    temp[i] = figuresPos[i];
                 }
-                Solutions.Add(temp);
+                solutions.Add(temp);
                 return;
             }
 
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < n; i++)
             {
                 if (!currentChessField[indexOfCurrentFigure, i])
                 {
-                    FiguresPos[indexOfStream, indexOfCurrentFigure] = i;
-                    bool[,] nextChessField = currentChessField.Clone() as bool[,];
-                    MarkFields(indexOfCurrentFigure, i, ref nextChessField);
+                    //Placing figure
+                    figuresPos[indexOfCurrentFigure] = i;
+                    var nextChessField = MarkFields(indexOfCurrentFigure, i, currentChessField);
 
-                    RunIteration(indexOfCurrentFigure + 1, nextChessField, indexOfStream, Solutions);
+                    //Going next
+                    RunIteration(indexOfCurrentFigure + 1, nextChessField, solutions, figuresPos);
                 }
             }
 
             return;
         }
 
-        private void MarkFields(int cIndex, int rIndex, ref bool[,] chessField)
+        private bool[,] MarkFields(int cIndex, int rIndex, bool[,] originChessField)
         {
+            //Cloning desk
+            bool[,] chessField = originChessField.Clone() as bool[,];
+
             //column and row
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < n; i++)
             {
-                chessField[cIndex, i] = true;
-                chessField[i, rIndex] = true;
+                chessField[cIndex, i] = chessField[i, rIndex] = true;
             }
 
             //main diagonal
-            int delta = 0;
-            while((cIndex + delta < N) && (rIndex + delta < N))
+            for (int c = cIndex, r = rIndex; c < n && r < n; c++, r++)
             {
-                chessField[cIndex + delta, rIndex + delta] = true;
-                delta++;
+                chessField[c, r] = true;
             }
-            delta = 0;
-            while((cIndex - delta >= 0) && (rIndex - delta >= 0))
+            for (int c = cIndex, r = rIndex; c >= 0 && r >= 0; c--, r--)
             {
-                chessField[cIndex - delta, rIndex - delta] = true;
-                delta++;
+                chessField[c, r] = true;
             }
 
             //additional diagonal
-            delta = 0;
-            while ((cIndex - delta >= 0) && (rIndex + delta < N))
+            for (int c = cIndex, r = rIndex; c >= 0 && r < n; c--, r++)
             {
-                chessField[cIndex - delta, rIndex + delta] = true;
-                delta++;
+                chessField[c, r] = true;
             }
-            delta = 0;
-            while ((cIndex + delta < N) && (rIndex - delta >= 0))
+            for (int c = cIndex, r = rIndex; c < n && r >= 0; c++, r--)
             {
-                chessField[cIndex + delta, rIndex - delta] = true;
-                delta++;
+                chessField[c, r] = true;
             }
+
+            return chessField;
         }
     }
 }
