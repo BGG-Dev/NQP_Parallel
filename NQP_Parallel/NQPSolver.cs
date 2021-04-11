@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace NQP
 {
-    class NQP_Solver
+    class NQPSolver
     {
         private readonly int n;
 
@@ -11,7 +11,7 @@ namespace NQP
 
         public IReadOnlyList<int[]> FinalSolutionSet => finalSolutionSet;
 
-        public NQP_Solver(int n)
+        public NQPSolver(int n)
         {
             this.n = n;
             finalSolutionSet = new List<int[]>();
@@ -19,49 +19,53 @@ namespace NQP
 
         public void RunNQPtask()
         {
-            bool[,] startChessField = new bool[n, n];
+            //Initialize start chess desk
+            bool[,] startChessDesk = new bool[n, n];
 
-            //Initialize of solution set
-            List<int[]>[] solutionSet = new List<int[]>[n];
+            //Initialize of solution sets (n array of lists of int arrays)
+            List<int[]>[] solutionSets = new List<int[]>[n];
 
             //Calling main func
             Parallel.For(0, n, (i, state) =>
             {
-                solutionSet[i] = new List<int[]>();
+                //Initializing variables for current stream
+                List<int[]> solutionSetForCurrentStream = new List<int[]>();
+                solutionSets[i] = solutionSetForCurrentStream;
                 int[] figuresPosForCurrentStream = new int[n];
+
+                //Placing first figure on new desk
                 figuresPosForCurrentStream[0] = i;
-                var nextChessField = MarkFields(0, i, startChessField);
-                RunIteration(1, nextChessField, solutionSet[i], figuresPosForCurrentStream);
+                var nextChessField = MarkFields(0, i, startChessDesk);
+
+                //Running algorithm
+                RunIteration(1, nextChessField, solutionSetForCurrentStream, figuresPosForCurrentStream);
             });
 
             //Concatinating result
             for (int i = 0; i < n; i++)
             {
-                finalSolutionSet.AddRange(solutionSet[i]);
+                finalSolutionSet.AddRange(solutionSets[i]);
             }
         }
 
-        private void RunIteration(int indexOfCurrentFigure, bool[,] currentChessField, List<int[]> solutions, int[] figuresPos)
+        private void RunIteration(int indexOfCurrentFigure, bool[,] currentChessDesk, List<int[]> solutions, int[] figuresPos)
         {
             if (indexOfCurrentFigure == n)
             {
                 //Adding solution to list
                 int[] temp = new int[n];
-                for (int i = 0; i < n; i++)
-                {
-                    temp[i] = figuresPos[i];
-                }
+                figuresPos.CopyTo(temp, 0);
                 solutions.Add(temp);
                 return;
             }
 
             for (int i = 0; i < n; i++)
             {
-                if (!currentChessField[indexOfCurrentFigure, i])
+                if (!currentChessDesk[indexOfCurrentFigure, i])
                 {
                     //Placing figure
                     figuresPos[indexOfCurrentFigure] = i;
-                    var nextChessField = MarkFields(indexOfCurrentFigure, i, currentChessField);
+                    var nextChessField = MarkFields(indexOfCurrentFigure, i, currentChessDesk);
 
                     //Going next
                     RunIteration(indexOfCurrentFigure + 1, nextChessField, solutions, figuresPos);
@@ -74,35 +78,35 @@ namespace NQP
         private bool[,] MarkFields(int cIndex, int rIndex, bool[,] originChessField)
         {
             //Cloning desk
-            bool[,] chessField = originChessField.Clone() as bool[,];
+            bool[,] nextChessDesk = originChessField.Clone() as bool[,];
 
             //column and row
             for (int i = 0; i < n; i++)
             {
-                chessField[cIndex, i] = chessField[i, rIndex] = true;
+                nextChessDesk[cIndex, i] = nextChessDesk[i, rIndex] = true;
             }
 
             //main diagonal
             for (int c = cIndex, r = rIndex; c < n && r < n; c++, r++)
             {
-                chessField[c, r] = true;
+                nextChessDesk[c, r] = true;
             }
             for (int c = cIndex, r = rIndex; c >= 0 && r >= 0; c--, r--)
             {
-                chessField[c, r] = true;
+                nextChessDesk[c, r] = true;
             }
 
             //additional diagonal
             for (int c = cIndex, r = rIndex; c >= 0 && r < n; c--, r++)
             {
-                chessField[c, r] = true;
+                nextChessDesk[c, r] = true;
             }
             for (int c = cIndex, r = rIndex; c < n && r >= 0; c++, r--)
             {
-                chessField[c, r] = true;
+                nextChessDesk[c, r] = true;
             }
 
-            return chessField;
+            return nextChessDesk;
         }
     }
 }

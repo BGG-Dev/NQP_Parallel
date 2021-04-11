@@ -78,9 +78,9 @@ namespace NQP
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.Location = new System.Drawing.Point(12, 599);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(180, 24);
+            this.label4.Size = new System.Drawing.Size(226, 24);
             this.label4.TabIndex = 7;
-            this.label4.Text = "Spended time (sec):";
+            this.label4.Text = "Spended time (h/m/s/ms):";
             // 
             // label3
             // 
@@ -184,7 +184,7 @@ namespace NQP
             this.Controls.Add(this.panel_Control);
             this.MinimumSize = new System.Drawing.Size(1085, 799);
             this.Name = "FormMain";
-            this.Text = "NQP";
+            this.Text = "NQP_Parallel";
             this.panel_Control.ResumeLayout(false);
             this.panel_Control.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_IndexOfSolution)).EndInit();
