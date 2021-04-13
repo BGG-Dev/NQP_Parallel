@@ -7,7 +7,7 @@ namespace NQP
 {
     public partial class FormMain : Form
     {
-        NQP_Solver nqps;
+        NQPSolver nqps;
         int n;
 
         PictureBox[,] chessDesk;
@@ -22,16 +22,16 @@ namespace NQP
         {
             //Initialize start variables
             n = Convert.ToInt32(numericUpDown_TaskDimention.Value);
-            nqps = new NQP_Solver(n);
+            nqps = new NQPSolver(n);
 
             //Running main func
             stopwatch.Start();
             nqps.RunNQPtask();
             stopwatch.Stop();
-            
-            //Preparing result
+
+            //Displaying result
             numericUpDown_IndexOfSolution.Maximum = nqps.FinalSolutionSet.Count - 1;
-            textBox_SpendedTime.Text = stopwatch.ElapsedMilliseconds.ToString();
+            textBox_SpendedTime.Text = stopwatch.Elapsed.ToString();
             textBox_SolutionCount.Text = nqps.FinalSolutionSet.Count.ToString();
             stopwatch.Reset();
             numericUpDown_IndexOfSolution.Enabled = true;
@@ -45,14 +45,19 @@ namespace NQP
 
         private void DrawChessDesk()
         {
+            //Clearing components
             panel_ChessDesk.Controls.Clear();
+            chessDesk = new PictureBox[n, n];
+
+            //Calculating new cell size
             int cellSize = panel_ChessDesk.Height / n;
 
-            chessDesk = new PictureBox[n, n];
+            //Building chess desk
             for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < n; j++)
                 {
+                    //Creating new cell
                     var newPictureBox = new PictureBox()
                     {
                         Size = new Size(cellSize, cellSize),
@@ -61,10 +66,11 @@ namespace NQP
                         BorderStyle = BorderStyle.FixedSingle
                     };
                     
+                    //Adding new cell to desk
                     panel_ChessDesk.Controls.Add(newPictureBox);
-                                        
                     chessDesk[i, j] = newPictureBox;
                     
+                    //Coloring cell
                     if (i % 2 == 0)
                         newPictureBox.BackColor = j % 2 != 0 ? Color.DarkGray : Color.White;
                     else
