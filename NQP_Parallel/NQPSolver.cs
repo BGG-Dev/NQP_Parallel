@@ -35,10 +35,10 @@ namespace NQP
 
                 //Placing first figure on new desk
                 figuresPosForCurrentStream[0] = i;
-                var nextChessField = MarkFields(0, i, startChessDesk);
+                var nextChessDesk = MarkFields(0, i, startChessDesk);
 
                 //Running algorithm
-                RunIteration(1, nextChessField, solutionSetForCurrentStream, figuresPosForCurrentStream);
+                RunIteration(1, nextChessDesk, solutionSetForCurrentStream, figuresPosForCurrentStream);
             });
 
             //Concatinating result
@@ -65,20 +65,20 @@ namespace NQP
                 {
                     //Placing figure
                     figuresPos[indexOfCurrentFigure] = i;
-                    var nextChessField = MarkFields(indexOfCurrentFigure, i, currentChessDesk);
+                    var nextChessDesk = MarkFields(indexOfCurrentFigure, i, currentChessDesk);
 
                     //Going next
-                    RunIteration(indexOfCurrentFigure + 1, nextChessField, solutions, figuresPos);
+                    RunIteration(indexOfCurrentFigure + 1, nextChessDesk, solutions, figuresPos);
                 }
             }
 
             return;
         }
 
-        private bool[,] MarkFields(int cIndex, int rIndex, bool[,] originChessField)
+        private bool[,] MarkFields(int cIndex, int rIndex, bool[,] originChessDesk)
         {
             //Cloning desk
-            bool[,] nextChessDesk = originChessField.Clone() as bool[,];
+            bool[,] nextChessDesk = originChessDesk.Clone() as bool[,];
 
             //column and row
             for (int i = 0; i < n; i++)
