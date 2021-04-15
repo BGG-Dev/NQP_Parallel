@@ -20,6 +20,7 @@ namespace NQP
 
         private void button_RunTask_Click(object sender, EventArgs e)
         {
+            
             //Initialize start variables
             n = Convert.ToInt32(numericUpDown_TaskDimention.Value);
             nqps = new NQPSolver(n);
@@ -31,10 +32,16 @@ namespace NQP
 
             //Displaying result
             numericUpDown_IndexOfSolution.Maximum = nqps.FinalSolutionSet.Count - 1;
-            textBox_SpendedTime.Text = stopwatch.Elapsed.ToString();
-            textBox_SolutionCount.Text = nqps.FinalSolutionSet.Count.ToString();
-            stopwatch.Reset();
             numericUpDown_IndexOfSolution.Enabled = true;
+
+            dataGridView_RunTimeInfo.Rows.Add();
+            dataGridView_RunTimeInfo[0, dataGridView_RunTimeInfo.Rows.Count - 1].Value = n.ToString();
+            dataGridView_RunTimeInfo[1, dataGridView_RunTimeInfo.Rows.Count - 1].Value = nqps.FinalSolutionSet.Count.ToString();
+            dataGridView_RunTimeInfo[2, dataGridView_RunTimeInfo.Rows.Count - 1].Value = stopwatch.ElapsedMilliseconds.ToString();
+            dataGridView_RunTimeInfo[3, dataGridView_RunTimeInfo.Rows.Count - 1].Value = stopwatch.Elapsed.ToString();
+            stopwatch.Reset();
+            
+            
         }
 
         private void numericUpDown_IndexOfSolution_ValueChanged(object sender, EventArgs e)
